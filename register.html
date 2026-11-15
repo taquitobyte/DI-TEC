@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - DI-TEC</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <div class="login-container">
+        <img src="logo.png" alt="DI-TEC Logo" class="logo">
+
+        <h1>Crear Cuenta</h1>
+
+        <form action="registro.php" method="POST">
+            <input type="text" name="nombre" placeholder="Nombre completo" required>
+            <input type="email" name="email" placeholder="Correo electrónico" required>
+            <input type="text" name="telefono" placeholder="Teléfono">
+            <input type="text" name="direccion" placeholder="Dirección">
+            <input type="password" name="contrasena" placeholder="Contraseña" required>
+
+            <button type="submit" class="btn-login">Registrarse</button>
+
+            <div class="links">
+                <a href="login.html" class="register">¿Ya tienes cuenta? Inicia sesión</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

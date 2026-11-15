@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Recuperar contraseña - DI-TEC</title>
+  <link rel="stylesheet" href="estilos.css">
+
+  <style>
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: white;
+      width: 400px;
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .logo {
+      width: 250px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      color: #0066ff;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    input[type="email"]:focus {
+      border-color: #0066ff;
+    }
+
+    .btn-login {
+      background-color: #0066ff;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .btn-login:hover {
+      background-color: #004de6;
+    }
+
+    .links {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .links a {
+      color: #0066ff;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .links a:hover {
+      color: #ff6600;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <img src="logo.png" alt="DI-TEC Logo" class="logo">
+    <h1>¿Olvidaste tu contraseña?</h1>
+
+    <p>Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+
+    <form action="forgot.php" method="POST">
+      <input type="email" name="email" placeholder="Correo electrónico" required>
+      <button type="submit" class="btn-login">Enviar enlace de restablecimiento</button>
+
+      <div class="links">
+        <a href="login.html">Volver al inicio</a>
+        <a href="register.html">Registrarse</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

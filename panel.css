@@ -1,0 +1,106 @@
+/* ====== Estilo general ====== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0a2647, #144272);
+    color: #eaf2fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* ====== Contenedor principal ====== */
+.panel-container {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    padding: 40px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* ====== Título ====== */
+.panel-container h1 {
+    font-size: 28px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #2c74b3;
+    padding-bottom: 10px;
+}
+
+/* ====== Texto ====== */
+.panel-container p {
+    font-size: 17px;
+    margin-bottom: 30px;
+    color: #cfe3ff;
+}
+
+/* ====== Opciones ====== */
+.panel-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.panel-opciones a {
+    text-decoration: none;
+    color: #ffffff;
+    background: #2c74b3;
+    border-radius: 10px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.panel-opciones a:hover {
+    background: #205295;
+    transform: scale(1.05);
+}
+
+/* ====== Botón de cerrar sesión ====== */
+.btn-logout {
+    display: inline-block;
+    background-color: #ff914d;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 25px;
+    border-radius: 10px;
+    transition: 0.3s;
+    font-weight: bold;
+    border: none;
+}
+
+.btn-logout:hover {
+    background-color: #ff6f3c;
+    transform: scale(1.05);
+}
+
+/* ====== Animación ====== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ====== Responsivo ====== */
+@media (max-width: 480px) {
+    .panel-container {
+        padding: 25px;
+    }
+
+    .panel-container h1 {
+        font-size: 22px;
+    }
+
+    .panel-opciones a {
+        font-size: 15px;
+        padding: 10px;
+    }
+}

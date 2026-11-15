@@ -1,0 +1,15 @@
+# PHP portable (se instala aparte en cada equipo)
+php/
+
+# Credenciales del correo (usa config_correo.ejemplo.php como plantilla)
+config_correo.php
+*.local.php
+
+# Si algún día se usa Composer
+vendor/
+
+# Archivos de prueba y del sistema
+info.php
+test_mail.php
+Thumbs.db
+.DS_Store
