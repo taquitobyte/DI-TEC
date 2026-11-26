@@ -21,9 +21,10 @@ if (isset($_GET['accion']) && isset($_GET['producto'])) {
     $stmtStock->execute([$productoID]);
     $stockReal = $stmtStock->fetchColumn();
 
-    if (!$stockReal) {
+    if ($stockReal === false) {
         die("Error: El producto no existe.");
     }
+    $stockReal = (int) $stockReal; // si el stock llegó a 0 aún se puede restar/eliminar del carrito
 
     if ($_GET['accion'] == 'sumar') {
 

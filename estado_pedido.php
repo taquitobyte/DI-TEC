@@ -90,7 +90,14 @@ function solicitar_cancelacion(PDO $conn, int $pedidoID, int $usuarioID): array
     if ($estado === 'Entregado') {
         return [false, "Un pedido entregado ya no se puede cancelar."];
     }
-    $conn->prepare("UPDATE Pedido SET Estado = ? WHERE PedidoID = ?")->execute([ESTADO_SOLICITUD, $pedidoID]);
+    // El UPDATE vuelve a comprobar el estado: si alguien lo cambió en este instante, no se pisa
+    $up = $conn->prepare("UPDATE Pedido SET Estado = ?
+                          WHERE PedidoID = ? AND UsuarioID = ?
+                            AND COALESCE(Estado,'Pendiente') NOT IN (?, ?, 'Entregado')");
+    $up->execute([ESTADO_SOLICITUD, $pedidoID, $usuarioID, ESTADO_SOLICITUD, ESTADO_CANCELADO]);
+    if ($up->rowCount() === 0) {
+        return [false, "El estado del pedido cambió. Recarga la página e inténtalo de nuevo."];
+    }
     return [true, "Tu solicitud de cancelación fue enviada. El proveedor o el administrador la revisará."];
 }
 
@@ -101,26 +108,38 @@ function solicitar_cancelacion(PDO $conn, int $pedidoID, int $usuarioID): array
  */
 function cancelar_pedido(PDO $conn, int $pedidoID): array
 {
-    $estado = pedido_estado_actual($conn, $pedidoID);
-    if ($estado === null) {
-        return [false, "El pedido no existe."];
-    }
-    if ($estado === ESTADO_CANCELADO) {
-        return [false, "El pedido ya estaba cancelado."];
-    }
-    if ($estado === 'Entregado') {
-        return [false, "Un pedido entregado no se puede cancelar."];
-    }
     try {
         $conn->beginTransaction();
-        $st = $conn->prepare("SELECT DetalleID, ProductoID, Cantidad FROM DetallePedido
-                              WHERE PedidoID = ? AND COALESCE(Estado,'Pendiente') NOT IN ('Entregado','Cancelado')");
+
+        // Se bloquea el pedido y se revisa su estado ya dentro de la transacción:
+        // si un proveedor y el admin cancelan al mismo tiempo, solo el primero
+        // regresa el stock (el segundo espera y ve que ya está cancelado).
+        $st = $conn->prepare("SELECT Estado FROM Pedido WITH (UPDLOCK, ROWLOCK) WHERE PedidoID = ?");
         $st->execute([$pedidoID]);
+        $estado = $st->fetchColumn();
+
+        if ($estado === false) {
+            $conn->rollBack();
+            return [false, "El pedido no existe."];
+        }
+        if ($estado === ESTADO_CANCELADO) {
+            $conn->rollBack();
+            return [false, "El pedido ya estaba cancelado."];
+        }
+        if ($estado === 'Entregado') {
+            $conn->rollBack();
+            return [false, "Un pedido entregado no se puede cancelar."];
+        }
+
+        $st = $conn->prepare("SELECT DetalleID, ProductoID, Cantidad FROM DetallePedido
+                              WHERE PedidoID = ? AND COALESCE(Estado,'Pendiente') NOT IN ('Entregado','Cancelado')
+                              ORDER BY ProductoID");
+        $st->execute([$pedidoID]);
+        $stockStmt   = $conn->prepare("UPDATE Producto SET Stock = COALESCE(Stock,0) + ? WHERE ProductoID = ?");
+        $detalleStmt = $conn->prepare("UPDATE DetallePedido SET Estado = 'Cancelado' WHERE DetalleID = ?");
         foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $d) {
-            $conn->prepare("UPDATE Producto SET Stock = COALESCE(Stock,0) + ? WHERE ProductoID = ?")
-                 ->execute([$d['Cantidad'], $d['ProductoID']]);
-            $conn->prepare("UPDATE DetallePedido SET Estado = 'Cancelado' WHERE DetalleID = ?")
-                 ->execute([$d['DetalleID']]);
+            $stockStmt->execute([$d['Cantidad'], $d['ProductoID']]);
+            $detalleStmt->execute([$d['DetalleID']]);
         }
         $conn->prepare("UPDATE Pedido SET Estado = ? WHERE PedidoID = ?")->execute([ESTADO_CANCELADO, $pedidoID]);
         $conn->commit();
@@ -128,8 +147,10 @@ function cancelar_pedido(PDO $conn, int $pedidoID): array
         if ($conn->inTransaction()) {
             $conn->rollBack();
         }
-        return [false, "No se pudo cancelar: " . $e->getMessage()];
+        error_log("DI-TEC cancelar_pedido: " . $e->getMessage());
+        return [false, "No se pudo cancelar el pedido. Inténtalo de nuevo."];
     }
+
     notificar_pedido_cliente($conn, $pedidoID, ESTADO_CANCELADO);
     return [true, "Pedido #$pedidoID cancelado. El stock se regresó al inventario."];
 }
@@ -141,7 +162,11 @@ function rechazar_solicitud_cancelacion(PDO $conn, int $pedidoID): array
         return [false, "Ese pedido no tiene una solicitud de cancelación pendiente."];
     }
     $nuevo = pedido_estado_calculado($conn, $pedidoID);
-    $conn->prepare("UPDATE Pedido SET Estado = ? WHERE PedidoID = ?")->execute([$nuevo, $pedidoID]);
+    $up = $conn->prepare("UPDATE Pedido SET Estado = ? WHERE PedidoID = ? AND Estado = ?");
+    $up->execute([$nuevo, $pedidoID, ESTADO_SOLICITUD]);
+    if ($up->rowCount() === 0) {
+        return [false, "Ese pedido ya no tiene una solicitud de cancelación pendiente."];
+    }
     notificar_pedido_cliente($conn, $pedidoID, 'Solicitud rechazada');
     return [true, "Solicitud rechazada. El pedido #$pedidoID sigue su curso ($nuevo)."];
 }

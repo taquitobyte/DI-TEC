@@ -1,5 +1,6 @@
 <?php
 include 'conexion.php';
+include 'seguridad.php';
 session_start();
 
 if (!isset($_SESSION['UsuarioID'])) {
@@ -163,23 +164,23 @@ foreach ($carrito as $item) {
 
     <!-- FORMULARIO DE TARJETA -->
     <div class="card-box">
-        <form action="procesar_pago.php" method="POST">
+        <form action="procesar_pago.php" method="POST" onsubmit="var b=this.querySelector('.btn-pagar'); b.disabled=true; b.textContent='Procesando pago...';">
 
             <h3 style="color:#003366;">💳 Información de la Tarjeta</h3>
 
             <label>Número de la tarjeta</label>
-            <input type="text" name="num_tarjeta" maxlength="16" required>
+            <input type="text" name="num_tarjeta" maxlength="16" pattern="\d{16}" inputmode="numeric" title="16 dígitos" required>
 
             <label>Nombre del titular</label>
             <input type="text" name="nombre_titular" required>
 
             <label>Fecha de expiración (MM/AA)</label>
-            <input type="text" name="exp" maxlength="5" placeholder="MM/AA" required>
+            <input type="text" name="exp" maxlength="5" placeholder="MM/AA" pattern="(0[1-9]|1[0-2])/\d{2}" title="Formato MM/AA" required>
 
             <label>Código CVV</label>
-            <input type="password" name="cvv" maxlength="3" required>
+            <input type="password" name="cvv" maxlength="3" pattern="\d{3}" inputmode="numeric" title="3 dígitos" required>
 
-            <input type="hidden" name="total" value="<?= $total ?>">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
             <button type="submit" class="btn-pagar">Confirmar Pago</button>
         </form>

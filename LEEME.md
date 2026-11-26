@@ -30,3 +30,9 @@ Página web en PHP 8.3 + Microsoft SQL Server.
 - Las contraseñas se guardan cifradas (bcrypt). Las cuentas antiguas con contraseña en texto plano se
   cifran solas la primera vez que inician sesión.
 - Prueba de conexión a la BD: <http://localhost:8000/test.php>
+
+## Mejoras en transacciones (compra y cancelación)
+- **Compra (`procesar_pago.php`):** el carrito se vuelve a leer *dentro* de la transacción (con bloqueo), por lo que lo que se cobra es exactamente lo que se guarda; si se presiona dos veces "Confirmar Pago" no se duplica el pedido. Si algo falla, se hace rollback y el cliente ve un mensaje claro (el detalle técnico queda en el log del servidor).
+- **Pago:** ahora lleva token CSRF, solo acepta POST y valida número (16 dígitos), fecha MM/AA no vencida y CVV (3 dígitos). La validación Luhn existe pero está desactivada por defecto (`VALIDAR_LUHN`).
+- **Cancelación (`estado_pedido.php`):** el estado del pedido se revisa dentro de la transacción con el pedido bloqueado, así que si un proveedor y el admin cancelan al mismo tiempo el stock se regresa una sola vez. Las solicitudes/rechazos de cancelación también comprueban el estado en el propio UPDATE.
+- **Carrito (`ver_carrito.php`):** un producto cuyo stock llegó a 0 ya se puede quitar del carrito.
